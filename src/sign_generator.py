@@ -203,8 +203,8 @@ class SignGenerator:
             })
         elif heaviness <= 50:
             params.update({
-                'size_multiplier': 1.0,
-                'stroke_offset': 0.0,
+                'size_multiplier': 1.05,  # Slightly larger for regular
+                'stroke_offset': 0.0,  # No offset to avoid issues
                 'style': 'Regular'
             })
         elif heaviness <= 75:
@@ -336,8 +336,16 @@ class SignGenerator:
         return workpiece
 
     def _get_offset_pattern(self, style: str, offset: float) -> List[Tuple[float, float]]:
-        """Get offset pattern for bold text effects"""
-        if style == 'Bold':
+        """Get offset pattern for text effects"""
+        if style == 'Regular':
+            # Small 3-point pattern for Regular to add slight thickness
+            return [
+                (0, 0),
+                (offset, 0),
+                (-offset, 0)
+            ]
+        elif style == 'Bold':
+            # 5-point pattern for Bold
             return [
                 (0, 0),
                 (offset, 0),
@@ -346,6 +354,7 @@ class SignGenerator:
                 (0, -offset)
             ]
         else:  # ExtraBold
+            # 9-point grid for ExtraBold
             return [
                 (dx * offset, dy * offset)
                 for dx in [-1, 0, 1]

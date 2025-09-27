@@ -318,16 +318,19 @@ class SignGeneratorGUI:
         size_frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E))
 
         ttk.Label(size_frame, text="Size (mm):").pack(side=tk.LEFT, padx=5)
-        self.font_size_spin = ttk.Spinbox(
+        self.font_size_spinbox = ttk.Spinbox(
             size_frame,
             from_=self.config.get("validation.font_size_min", 5),
             to=self.config.get("validation.font_size_max", 50),
             textvariable=self.font_size_var,
             width=10,
             increment=1,
-            format="%.1f"
+            format="%.1f",
+            command=lambda: self.on_parameter_changed()
         )
-        self.font_size_spin.pack(side=tk.LEFT, padx=5)
+        self.font_size_spinbox.pack(side=tk.LEFT, padx=5)
+        # Also bind keyboard events for direct typing
+        self.font_size_spinbox.bind('<KeyRelease>', lambda e: self.on_parameter_changed())
 
         self.auto_size_check = ttk.Checkbutton(
             size_frame,
@@ -521,13 +524,13 @@ class SignGeneratorGUI:
         ttk.Button(
             controls_frame,
             text="Export Preview",
-            command=self.export_preview_image
+            command=lambda: messagebox.showinfo("Export", "Export preview image feature coming soon!")
         ).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(
             controls_frame,
             text="Copy to Clipboard",
-            command=self.copy_preview_to_clipboard
+            command=lambda: messagebox.showinfo("Copy", "Copy preview feature coming soon!")
         ).pack(side=tk.LEFT, padx=5)
 
     def _create_status_bar(self):
@@ -674,7 +677,11 @@ class SignGeneratorGUI:
             self.preview_canvas.delete('all')
 
             # Get parameters
-            text = self.text_var.get()
+            # Get text from Text widget if it exists, otherwise from StringVar
+            if hasattr(self, 'text_input'):
+                text = self.text_input.get('1.0', 'end-1c').strip()
+            else:
+                text = self.text_var.get()
             width = self.width_var.get()
             height = self.height_var.get()
             font_family = self.font_family_var.get()
@@ -807,7 +814,11 @@ class SignGeneratorGUI:
     def validate_inputs(self) -> bool:
         """Validate all inputs before generation"""
         # Get all parameters
-        text = self.text_var.get()
+        # Get text from Text widget if it exists, otherwise from StringVar
+        if hasattr(self, 'text_input'):
+            text = self.text_input.get('1.0', 'end-1c').strip()
+        else:
+            text = self.text_var.get()
         width = self.width_var.get()
         height = self.height_var.get()
         font_size = self.font_size_var.get() if not self.auto_size_var.get() else 12
@@ -875,7 +886,11 @@ class SignGeneratorGUI:
         """Worker thread for sign generation"""
         try:
             # Get parameters
-            text = self.text_var.get()
+            # Get text from Text widget if it exists, otherwise from StringVar
+            if hasattr(self, 'text_input'):
+                text = self.text_input.get('1.0', 'end-1c').strip()
+            else:
+                text = self.text_var.get()
             width = self.width_var.get()
             height = self.height_var.get()
             font_family = self.font_family_var.get()
@@ -989,7 +1004,11 @@ class SignGeneratorGUI:
 
     def suggest_optimal_parameters(self):
         """Suggest optimal parameters based on text and dimensions"""
-        text = self.text_var.get()
+        # Get text from Text widget if it exists, otherwise from StringVar
+        if hasattr(self, 'text_input'):
+            text = self.text_input.get('1.0', 'end-1c').strip()
+        else:
+            text = self.text_var.get()
         width = self.width_var.get()
         height = self.height_var.get()
 
