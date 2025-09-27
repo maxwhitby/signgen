@@ -1,362 +1,269 @@
-# Parametric Sign Generator for 3D Printing - GUI Version
+# SignGen - Parametric Sign Generator for 3D Printing
+
+## Project Status: v1.0.1 - COMPLETE & DEPLOYED ✅
+
+**GitHub Repository**: https://github.com/maxwhitby/signgen
+**Current Version**: 1.0.1
+**Last Updated**: September 27, 2024
 
 ## Project Overview
-This project creates customizable two-color signs/labels for 3D printing, specifically optimized for Bambu Lab P1S printers with bi-color printing capability. The signs use a stencil-cut technique where text is cut out from the top layer, allowing the bottom layer color to show through.
+A fully-functional desktop application for creating customizable two-color signs/labels for 3D printing, optimized for Bambu Lab P1S printers. The signs use a stencil-cut technique where text is cut out from the top layer, revealing the contrasting bottom layer color.
 
-## Current Status
-✅ **CLI VERSION COMPLETE** - The CadQuery-based command-line generator is fully functional
-🎯 **NEW DIRECTION** - Create a Python GUI application for easier sign generation
+## Completed Features ✅
 
-## New GUI Requirements
+### Core Architecture (v1.0.0)
+- **Modular Design**: Complete refactor with separated concerns
+  - `src/sign_generator.py` - Core generation engine with CadQuery
+  - `src/validators.py` - Comprehensive input validation and prediction
+  - `src/config_manager.py` - Settings and preset management
+  - `src/exceptions.py` - Custom exception hierarchy
+  - `src/logger.py` - Centralized logging system
+  - `src/gui.py` - Consolidated GUI with all features
+  - `src/cli.py` - Full-featured command-line interface
 
-### Core Functionality
-Create a desktop GUI application with the following input fields:
-1. **Text to print** - The label text (single or multi-line)
-2. **Label dimensions** - Height and Width in mm
-3. **Text heaviness** - Control the boldness/weight of text (amount of black inside each character)
-4. **Bottom layer thickness** - Thickness in mm for the base layer
-5. **Top layer thickness** - Thickness in mm for the top layer with text cutout
+### GUI Application (v1.0.1)
+- **Real-time 2D Preview**: Updates as you type (fixed in v1.0.1)
+- **Text Controls**:
+  - Multi-line text input with live preview
+  - Font selection (16 platform-specific sans-serif fonts)
+  - Manual or automatic font sizing
+  - Font size spinbox with immediate updates (fixed in v1.0.1)
+- **Text Weight/Heaviness**:
+  - 0-100 slider control
+  - Preset buttons (Light/Regular/Bold/Extra Bold)
+  - Multi-cut patterns for bold effects
+  - Consistent thickness between preview and generation (fixed in v1.0.1)
+- **Dimension Controls**:
+  - Width: 10-500mm
+  - Height: 5-200mm
+  - Bottom layer thickness: 0.2-5.0mm
+  - Top layer thickness: 0.2-5.0mm
+- **Advanced Features**:
+  - Preset management (save/load/delete/rename)
+  - Validation with warnings and error prevention
+  - Configuration persistence
+  - Debug mode toggle
+  - Menu system (File, Edit, View, Help)
+  - User guide and troubleshooting built-in
 
-### Key Files
-
-#### Current CLI Implementation (Reference)
-- `cadquery_sign_generator.py` - Working CLI generator to be adapted for GUI backend
-  - Properly cuts text from top layer
-  - Generates two separate STL files for bi-color printing
-  - Use as the core engine for GUI
-
-#### New GUI Implementation (To Create)
-- `sign_generator_gui.py` - Main GUI application
-- `gui_generator_backend.py` - Backend engine (adapted from cadquery_sign_generator.py)
-- `gui_config.json` - GUI settings and defaults
-
-
-### GUI Technologies to Use
-- **tkinter** - Built-in Python GUI framework (no extra dependencies)
-- **Alternative**: PyQt5/PySide2 for more modern look
-- **CadQuery** - Keep for CAD operations and text handling
-- **trimesh** - For mesh operations and STL export
-- **Threading** - For non-blocking STL generation
-
-### Dependencies
-```txt
-cadquery
-trimesh
-numpy
-shapely
-# GUI options (choose one):
-# tkinter (built-in)
-# PyQt5 (pip install PyQt5)
-# PySide2 (pip install PySide2)
-```
-
-### Installation
+### Command-Line Interface
 ```bash
-pip install cadquery trimesh numpy shapely
-# For PyQt5 option:
-pip install PyQt5
+python -m src.cli "TEXT" [options]
+  --width WIDTH             Sign width in mm (default: 100)
+  --height HEIGHT           Sign height in mm (default: 25)
+  --font FONT              Font family (default: Arial)
+  --font-size SIZE         Font size in mm (auto if not specified)
+  --heaviness WEIGHT       Text weight 0-100 (default: 50)
+  --bottom-thickness MM    Bottom layer thickness (default: 1.0)
+  --top-thickness MM       Top layer thickness (default: 1.0)
+  --output-dir DIR         Output directory (default: output)
+  --debug                  Enable debug logging
 ```
 
-## GUI Design Specifications
+## Recent Fixes (v1.0.1)
 
-### Main Window Layout
-```
-┌─────────────────────────────────────────────┐
-│  Parametric Sign Generator                  │
-├─────────────────────────────────────────────┤
-│                                             │
-│  Text to Print:                            │
-│  ┌─────────────────────────────────────┐   │
-│  │ [Text input field]                  │   │
-│  └─────────────────────────────────────┘   │
-│                                             │
-│  Label Dimensions:                         │
-│  Width (mm):  [100]  Height (mm): [25]     │
-│                                             │
-│  Text Heaviness:                           │
-│  Light ○ ● Regular ○ Bold ○ Extra Bold    │
-│  [Slider: 0 ──────●────── 100]             │
-│                                             │
-│  Layer Thickness:                          │
-│  Bottom (mm): [1.0]  Top (mm): [1.0]       │
-│                                             │
-│  [Generate STL Files]  [Preview]  [Reset]  │
-│                                             │
-│  Status: Ready                             │
-│  ─────────────────────────────────────     │
-│  Output: Files saved to output/            │
-└─────────────────────────────────────────────┘
-```
-
-### Input Field Specifications
-
-#### 1. Text to Print
-- **Type**: Text area (multi-line capable)
-- **Default**: "LABEL"
-- **Validation**: Non-empty
-- **Max length**: 100 characters recommended
-
-#### 2. Label Dimensions
-- **Width**: Spinbox, 10-500mm, default 100mm
-- **Height**: Spinbox, 5-200mm, default 25mm
-- **Validation**: Positive numbers only
-
-#### 3. Text Heaviness
-- **Type**: Radio buttons + Slider
-- **Options**: 
-  - Light (font-weight: 300)
-  - Regular (font-weight: 400)
-  - Bold (font-weight: 700)
-  - Extra Bold (font-weight: 900)
-- **Slider**: 0-100 for fine control
-- **Implementation**: Adjust stroke width or use different font weights
-
-#### 4. Layer Thickness
-- **Bottom**: Spinbox, 0.2-5.0mm, default 1.0mm
-- **Top**: Spinbox, 0.2-5.0mm, default 1.0mm
-- **Step**: 0.1mm increments
-
-### GUI Features to Implement
-
-#### Phase 1 - Basic GUI
-- [ ] Window with all input fields
-- [ ] Generate button functionality
-- [ ] Basic validation
-- [ ] Status messages
-- [ ] File save dialog
-
-#### Phase 2 - Enhanced Features
-- [ ] Live preview panel
-- [ ] Drag & drop text files
-- [ ] Recent files list
-- [ ] Save/load presets
-- [ ] Progress bar for generation
-
-#### Phase 3 - Advanced Features
-- [ ] 3D preview using matplotlib
-- [ ] Font selection dropdown
-- [ ] Batch processing tab
-- [ ] Export settings (STL, 3MF, etc.)
-
+1. **Live Preview Updates**: Text preview now updates in real-time when typing
+2. **Font Size Control**: Spinbox changes trigger immediate preview updates
+3. **Text Thickness Consistency**:
+   - Regular weight now uses 1.05x size multiplier
+   - Better match between preview and generated models
+4. **GUI Stability**: Fixed all method reference errors that caused startup failures
+5. **Preset Management**: Added all missing preset management methods
 
 ## Project Structure
 ```
-/mnt/user-data/outputs/
-├── cadquery_sign_generator.py     # Main working generator
-├── working_sign_generator.py      # Alternative simpler version
-├── simple_sign_generator.py       # Basic block letter version (deprecated)
-├── parametric_sign_generator.py   # Original version (has text issues)
-├── create_3mf.py                  # 3MF file creator (experimental)
-├── create_bambu_3mf.py           # Bambu Studio project creator
-├── generate_all_examples.py       # Batch example generator
-├── requirements.txt               # Python dependencies
-├── output/                        # Generated STL files
-│   ├── ThreadedInserts_Final_bottom_black.stl
-│   ├── ThreadedInserts_Final_top_yellow.stl
-│   └── [various example STL files]
-├── PRINT_INSTRUCTIONS.md         # Printing guide for end users
-├── QUICK_START_GUIDE.md         # Quick reference guide
-└── README.md                     # Original comprehensive documentation
+signgen/
+├── src/
+│   ├── __init__.py          # Package init (v1.0.1)
+│   ├── sign_generator.py    # Core generation engine
+│   ├── gui.py              # Consolidated GUI application
+│   ├── cli.py              # Command-line interface
+│   ├── validators.py       # Input validation system
+│   ├── config_manager.py   # Settings management
+│   ├── exceptions.py       # Custom exceptions
+│   └── logger.py           # Logging configuration
+├── tests/
+│   ├── test_validators.py  # Validator unit tests
+│   └── test_config.py      # Config manager tests
+├── legacy/                 # Old versions (archived)
+├── output/                 # Generated STL files
+├── example_output/         # Sample STL files
+├── requirements.txt        # Python dependencies
+├── setup.py               # Package setup
+├── LICENSE                # MIT License
+├── README.md              # Main documentation
+├── CHANGELOG.md           # Version history
+└── .gitignore            # Git ignore rules
 ```
+
+## Technical Implementation
+
+### Text Weight/Heaviness System
+The heaviness parameter (0-100) controls text boldness through:
+
+1. **Light (0-25)**:
+   - Size multiplier: 0.95x
+   - No offset patterns
+   - Preview: Gray tinted text
+
+2. **Regular (26-50)**:
+   - Size multiplier: 1.05x (increased in v1.0.1)
+   - No offset patterns (simplified in v1.0.1)
+   - Preview: Black text
+
+3. **Bold (51-75)**:
+   - Size multiplier: 1.12x
+   - 5-point offset pattern for thickness
+   - Preview: Bold font with overlays
+
+4. **Extra Bold (76-100)**:
+   - Size multiplier: 1.25x
+   - 9-point grid offset pattern
+   - Preview: Bold font with maximum overlays
+
+### Validation System
+Pre-generation validation prevents failures by checking:
+- Text not empty and reasonable length
+- Dimensions within acceptable ranges
+- Font size appropriate for sign size
+- Prediction of text cutting through layers
+- Aspect ratio sanity checks
+- Layer thickness validation
+
+### Key Algorithms
+
+#### Auto Font Sizing
+```python
+# Font-specific width factors
+font_widths = {
+    'Impact': 0.45,
+    'Arial': 0.55,
+    'Arial Black': 0.65,
+    # ... etc
+}
+width_factor = font_widths.get(font_family, 0.55)
+width_factor += (heaviness / 100) * 0.15  # Adjust for heaviness
+
+# Calculate based on constraints
+max_text_width = width * 0.75  # Leave 25% margin
+font_size_width = max_text_width / (len(text) * width_factor)
+font_size_height = height * 0.6  # Leave 40% margin
+font_size = min(font_size_width, font_size_height)
+```
+
+#### Cut-Through Prediction
+The validator predicts if text will cut completely through the top layer using:
+- Coverage ratio (cut area / sign area)
+- Heaviness factor
+- Font size relative to sign height
+- Top layer thickness
+- Returns: (will_cut_through: bool, confidence: 0-100%)
 
 ## Known Issues & Solutions
 
-### Issue 1: Text Generation in Original Version
-**Problem**: The original `parametric_sign_generator.py` using matplotlib had issues with font rendering and text polygon creation.
-**Solution**: Switched to CadQuery which has robust built-in text handling for CAD operations.
+### Issue: Top layer STL not generated
+**Cause**: Text has cut completely through the layer
+**Solution**: Reduce font size, reduce heaviness, or increase top layer thickness
 
-### Issue 2: Text Width/Margins
-**Problem**: Text was too wide for the sign, extending too close to edges.
-**Solution**: Implemented auto-sizing in `cadquery_sign_generator.py` and reduced default font size to 8.5mm for 100mm wide signs.
+### Issue: Preview appearance vs generated model (Fixed in v1.0.1)
+**Previous**: Preview showed thicker text than generated
+**Solution**: Adjusted Regular weight to use 1.05x size multiplier
 
-### Issue 3: 3MF File Compatibility
-**Problem**: Generated .3mf files weren't importing correctly into Bambu Studio.
-**Status**: Reverted to two separate STL files for maximum compatibility.
+## Testing & Quality
 
-## Tasks for Claude Code - GUI Development
+### Automated Tests
+- Unit tests for validators
+- Unit tests for config manager
+- Test framework ready for expansion
 
-### Priority 1: Core GUI Implementation
-1. **Create Main GUI Application**
-   - Choose GUI framework (tkinter recommended for simplicity)
-   - Implement main window with all input fields
-   - Add buttons: Generate STL, Preview, Reset
-   - Status bar for feedback
+### Manual Testing Checklist
+- [x] GUI launches without errors
+- [x] Text preview updates on typing
+- [x] Font size changes update preview
+- [x] All fonts render correctly
+- [x] Heaviness slider works smoothly
+- [x] STL files generate successfully
+- [x] Generated thickness matches preview
+- [x] Validation prevents bad inputs
+- [x] Presets save and load correctly
+- [x] CLI generates files correctly
 
-2. **Implement Text Heaviness Feature**
-   - Research font weight implementation in CadQuery
-   - Map slider values (0-100) to font weights
-   - Alternative: Implement stroke width adjustment
-   - Provide visual feedback
+## Deployment
 
-3. **Connect Backend Engine**
-   - Adapt cadquery_sign_generator.py as backend
-   - Pass GUI parameters to generator
-   - Handle file generation in separate thread
-   - Show progress during generation
+### Installation
+```bash
+# From GitHub
+git clone https://github.com/maxwhitby/signgen.git
+cd signgen
+pip install -r requirements.txt
 
-4. **Input Validation**
-   - Validate numeric ranges
-   - Check text not empty
-   - Prevent invalid dimension combinations
-   - Show clear error messages
+# Run GUI
+python -m src.gui
 
-### Priority 2: User Experience Enhancements
-1. **Add Live Preview Panel**
-   - 2D representation of sign dimensions
-   - Show text layout in real-time
-   - Update on parameter changes
-   - Display measurements
+# Run CLI
+python -m src.cli "YOUR TEXT"
+```
 
-2. **Preset System**
-   - Common label sizes (small, medium, large)
-   - Save custom presets
-   - Load last used settings
-   - Quick templates
+### Requirements
+- Python 3.7+
+- CadQuery 2.0+
+- NumPy
+- Trimesh
+- Tkinter (included with Python)
 
-3. **File Management**
-   - Choose output directory
-   - Auto-naming system
-   - Show recent files
-   - Open output folder button
+## Future Enhancements (Potential)
 
-### Priority 3: Advanced Features
-1. **3D Preview**
-   - Real-time 3D view
-   - Show both layers
-   - Rotation controls
-   - Export preview image
+1. **3D Preview**: Add matplotlib 3D view
+2. **Web Interface**: Flask/FastAPI backend
+3. **Batch Processing**: CSV import for multiple signs
+4. **Advanced Text Effects**: Beveled edges, outlines
+5. **Icon Support**: Pre-defined icon library
+6. **Export Formats**: Support for 3MF, STEP
+7. **Cloud Storage**: Save presets to cloud
+8. **Bambu Studio Plugin**: Direct integration
 
-2. **Batch Processing**
-   - Multiple signs from list
-   - Import from CSV/Excel
-   - Queue management
-   - Bulk export
+## Context for Future Sessions
 
-3. **Extended Options**
-   - Font selection
-   - Multi-line text with alignment
-   - Border styles
-   - Icon library
-   - Support multi-level designs
+### Key Design Decisions
+1. **Tkinter over PyQt**: Chosen for zero additional dependencies
+2. **CadQuery for Generation**: Robust CAD kernel for accurate geometry
+3. **Modular Architecture**: Easy to extend and maintain
+4. **Text Widget vs StringVar**: Direct reading from Text widget for real-time updates
+5. **Multi-cut Patterns**: Physical thickness through offset cuts
 
-2. **Border/Frame Options**
-   - Add optional raised borders
-   - Decorative corner elements
+### Important Code Sections
 
-3. **Mounting Features**
-   - Add screw holes option
-   - Magnetic insert pockets
-   - Adhesive backing guides
-
-4. **Text Effects**
-   - Beveled edges on text
-   - Outlined text (double cut)
-   - Embossed option (raised instead of cut)
-
-### Testing Needed
-1. Test with various text lengths and special characters
-2. Verify STL validity with different CAD software
-3. Test actual printing on Bambu Lab P1S
-4. Benchmark generation speed for large batches
-
-## API Design for Future Development
-
-### Proposed Class Structure
+#### Text Preview Update (src/gui.py:677-681)
 ```python
-class SignGenerator:
-    def __init__(self, preset="standard"):
-        # Load preset configurations
-        
-    def set_dimensions(self, width, height, thickness):
-        # Set sign dimensions
-        
-    def set_text(self, text, font="Arial", size="auto"):
-        # Configure text with auto-sizing option
-        
-    def add_icon(self, icon_type, position="left"):
-        # Add predefined icons
-        
-    def add_mounting(self, type="holes", spacing=None):
-        # Add mounting features
-        
-    def generate(self, output_format="stl"):
-        # Generate files in specified format
-        
-    def batch_generate(self, csv_file):
-        # Generate multiple signs from CSV data
+# Get text from Text widget if it exists, otherwise from StringVar
+if hasattr(self, 'text_input'):
+    text = self.text_input.get('1.0', 'end-1c').strip()
+else:
+    text = self.text_var.get()
 ```
 
-## Deployment Considerations
-
-### Web Interface (Future)
-- Flask/FastAPI backend
-- Real-time STL preview
-- Direct download or email delivery
-- Preset templates gallery
-
-### Command Line Tool
-- Current implementation works well
-- Could add config file support
-- Batch processing from CSV/JSON
-
-### Integration Points
-- Bambu Studio plugin potential
-- OctoPrint integration
-- Thingiverse Customizer compatible
-
-## Code Quality Notes
-
-### What's Working Well
-- CadQuery implementation is stable
-- STL generation is reliable
-- File sizes indicate proper geometry
-
-### Areas for Improvement
-- Error handling could be more robust
-- Need input validation for dimensions
-- Should add logging for debugging
-- Code could use more comments
-
-### Performance Metrics
-- Current generation time: ~2-3 seconds per sign
-- File sizes: 26KB (base) + 300-1200KB (top with text)
-- Memory usage: Minimal (~50MB)
-
-## Testing Commands
-
-### Basic Test
-```bash
-python cadquery_sign_generator.py "TEST" --width 60 --height 20 --font-size 14
+#### Font Size Event Binding (src/gui.py:329-333)
+```python
+self.font_size_spinbox = ttk.Spinbox(
+    ...
+    command=lambda: self.on_parameter_changed()
+)
+# Also bind keyboard events for direct typing
+self.font_size_spinbox.bind('<KeyRelease>', lambda e: self.on_parameter_changed())
 ```
 
-### Production Example
-```bash
-python cadquery_sign_generator.py "Threaded Inserts" --width 100 --height 25 --font-size 8.5
-```
+### Files to Review for Context
+1. `src/sign_generator.py` - Core generation logic
+2. `src/gui.py` - GUI implementation
+3. `src/validators.py` - Validation logic
+4. `CHANGELOG.md` - Recent changes
+5. `README.md` - User documentation
 
-### Batch Generation
-```bash
-python generate_all_examples.py
-```
-
-## User Feedback Integration
-- Users want simpler material assignment in Bambu Studio
-- Need better handling of long text strings
-- Request for preview images alongside STL files
-- Want QR code support for asset tracking
-
-## Next Session Goals
-1. Fix any immediate bugs
-2. Add requested features
-3. Improve error handling
-4. Create web interface prototype
-5. Add comprehensive unit tests
-
-## Contact & Context
-- Target printer: Bambu Lab P1S
-- Primary use case: Workshop/equipment labeling
-- Color scheme: Typically black text on yellow background
-- User skill level: Intermediate 3D printing experience
+## Contact & Support
+- **Repository**: https://github.com/maxwhitby/signgen
+- **Issues**: https://github.com/maxwhitby/signgen/issues
+- **Target Printer**: Bambu Lab P1S
+- **Primary Use**: Workshop/equipment labeling
 
 ---
-*This project is ready for continued development. The core functionality is working, and the architecture supports easy extension.*
+*Project successfully refactored, tested, and deployed. Ready for production use and future enhancements.*
