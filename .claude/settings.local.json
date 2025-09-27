@@ -16,7 +16,8 @@
       "Read(//Users/maxwhitby/.ssh/**)",
       "Bash(git remote set-url:*)",
       "Bash(ssh-add:*)",
-      "Bash(timeout 3 python -m src.gui)"
+      "Bash(timeout 3 python -m src.gui)",
+      "Bash(__NEW_LINE__ mv README.md README_OLD.md)"
     ],
     "deny": [],
     "ask": []

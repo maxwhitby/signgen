@@ -10,7 +10,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="signgen",
-    version="1.0.0",
+    version="1.0.1",
     author="SignGen Contributors",
     description="Parametric Sign Generator for 3D Printing",
     long_description=long_description,

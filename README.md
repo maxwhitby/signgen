@@ -1,241 +1,237 @@
-# Parametric Sign Generator for 3D Printing
+# SignGen - Parametric Sign Generator for 3D Printing
 
-## 🎯 NEW DIRECTION: GUI Application Development
-**Note for Developers**: This project is being transformed into a GUI application. See `GUI_SPECIFICATION.md` and `START_HERE.md` for the new development direction. The command-line version below is fully functional and will serve as the backend for the GUI.
+![Version](https://img.shields.io/badge/version-1.0.1-green.svg)
+![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
----
+A powerful tool for creating customizable two-color signs and labels for 3D printing, optimized for Bambu Lab P1S printers with bi-color printing capability.
 
-## Original CLI Version Documentation
-
-A Python tool for generating customizable two-color signs/labels for 3D printing, optimized for the Bambu Lab P1S and similar printers.
+**Latest Updates (v1.0.1)**: Fixed live preview updates, improved text thickness consistency, see [CHANGELOG](CHANGELOG.md) for details.
 
 ## Features
 
-- **Parametric Design**: Fully customizable text, dimensions, and styling
-- **Two-Color Printing**: Designed for bi-color printing with stencil-cut text
-- **Engineering-Focused**: Clean sans-serif fonts suitable for technical labels
-- **STL Output**: Generates separate STL files for each color layer
-- **Rounded Corners**: Optional rounded corners for professional appearance
-- **Batch Generation**: Create multiple signs with different parameters
+- **Intuitive GUI**: User-friendly interface with real-time 2D preview
+- **Text Customization**: Adjustable text weight/heaviness from light to extra bold
+- **Smart Font Sizing**: Automatic or manual font size control
+- **Multiple Fonts**: Support for various sans-serif typefaces
+- **Validation System**: Pre-generation validation to prevent failures
+- **Preset Management**: Save and load custom presets
+- **Command-Line Interface**: Full CLI support for automation
+- **Cross-Platform**: Works on Windows, macOS, and Linux
 
 ## Installation
 
-### Prerequisites
+### From Source
 
-- Python 3.7 or higher
-- pip (Python package installer)
-
-### Setup
-
-1. Install the required dependencies:
 ```bash
+# Clone the repository
+git clone https://github.com/maxwhitby/signgen.git
+cd signgen
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Install the package
+pip install -e .
 ```
 
-## Usage
+### Using pip (coming soon)
 
-### Basic Usage
-
-Generate a simple sign with default parameters:
 ```bash
-python parametric_sign_generator.py "YOUR TEXT"
+pip install signgen
 ```
 
-### Command Line Options
+## Quick Start
+
+### GUI Application
+
+Launch the GUI application:
 
 ```bash
-python parametric_sign_generator.py "YOUR TEXT" [options]
+python -m src.gui
+# or after installation:
+signgen-gui
+```
+
+### Command Line
+
+Generate a sign from the command line:
+
+```bash
+python -m src.cli "YOUR TEXT" --width 100 --height 25 --heaviness 50
+# or after installation:
+signgen "YOUR TEXT" --width 100 --height 25 --heaviness 50
+```
+
+## Usage Guide
+
+### GUI Controls
+
+1. **Text Input**: Enter the text for your sign
+2. **Dimensions**: Set width and height in millimeters
+3. **Font Selection**: Choose from available fonts or use preset buttons
+4. **Text Weight**: Adjust the slider (0-100) to control text heaviness
+   - Light (0-25): Thin, delicate text
+   - Regular (26-50): Standard text weight
+   - Bold (51-75): Heavier, prominent text
+   - Extra Bold (76-100): Maximum text weight
+5. **Font Size**: Enable auto-size or set manually (5-50mm)
+6. **Layer Thickness**: Set bottom and top layer thickness (typically 1mm each)
+
+### CLI Options
+
+```bash
+signgen "TEXT" [options]
 
 Options:
-  --width FLOAT          Sign width in mm (default: 100)
-  --height FLOAT         Sign height in mm (default: 30)
-  --font-size FLOAT      Font size in mm (default: 20)
-  --top-thickness FLOAT  Top layer thickness in mm (default: 1.0)
-  --bottom-thickness FLOAT  Bottom layer thickness in mm (default: 1.0)
-  --corner-radius FLOAT  Corner radius in mm (default: 2.0)
-  --output STRING        Base filename for output STL files (default: sign)
-  --font STRING          Font name (default: Arial)
+  --width WIDTH             Sign width in mm (default: 100)
+  --height HEIGHT           Sign height in mm (default: 25)
+  --font FONT              Font family (default: Arial)
+  --font-size SIZE         Font size in mm (auto if not specified)
+  --heaviness WEIGHT       Text weight 0-100 (default: 50)
+  --bottom-thickness MM    Bottom layer thickness (default: 1.0)
+  --top-thickness MM       Top layer thickness (default: 1.0)
+  --output-dir DIR         Output directory (default: output)
+  --debug                  Enable debug logging
 ```
 
-### Examples
+## How It Works
 
-1. **Simple Label**:
-```bash
-python parametric_sign_generator.py "MOTOR-01" --width 80 --height 25 --font-size 15
-```
+The generator creates two-layer signs using a stencil-cut technique:
 
-2. **Warning Sign**:
-```bash
-python parametric_sign_generator.py "HIGH VOLTAGE" --width 120 --height 40 --font-size 18
-```
+1. **Bottom Layer**: A solid base layer (typically printed in black)
+2. **Top Layer**: A layer with text cut out (typically printed in yellow)
 
-3. **Small Component Label**:
-```bash
-python parametric_sign_generator.py "PWR" --width 30 --height 15 --font-size 10 --top-thickness 0.8
-```
+When assembled, the bottom layer shows through the text cutouts, creating high-contrast, professional-looking labels.
 
-4. **Department Sign**:
-```bash
-python parametric_sign_generator.py "ENGINEERING" --width 150 --height 50 --font-size 25
-```
+## Printing Instructions
 
-### Generate Example Signs
+1. **Slicer Setup**:
+   - Import both STL files into your slicer
+   - Assign different colors to each file
+   - Ensure proper layer alignment
 
-Run the example script to generate several sample signs:
-```bash
-python generate_examples.py
-```
+2. **Recommended Settings**:
+   - Layer height: 0.2mm
+   - Infill: 20-30%
+   - No supports needed
+   - Print speed: Standard
 
-This will create various example signs in the `output` directory.
+3. **Bambu Studio**:
+   - Use the AMS for automatic color switching
+   - Files are pre-named with color hints (_bottom_black, _top_yellow)
 
-## Output Files
+## Recent Improvements (v1.0.1)
 
-The generator creates three STL files for each sign:
-
-1. `*_top_yellow.stl` - Top layer with text cut out (for yellow filament)
-2. `*_bottom_black.stl` - Bottom solid layer (for black filament)
-3. `*_combined_preview.stl` - Combined model for preview only
-
-## Printing Instructions for Bambu Lab P1S
-
-### Bambu Studio Setup
-
-1. **Import Files**:
-   - Click "Import" or drag both layer files into Bambu Studio
-   - Import `*_bottom_black.stl` first
-   - Import `*_top_yellow.stl` second
-
-2. **Assign Filaments**:
-   - Select the bottom layer object
-   - Assign black filament (or your text color)
-   - Select the top layer object
-   - Assign yellow filament (or your background color)
-
-3. **Alignment**:
-   - The layers should auto-align at origin (0,0,0)
-   - If not aligned, select both objects and use "Align" tool
-
-### Recommended Print Settings
-
-- **Layer Height**: 0.2mm (0.16mm for finer detail)
-- **Initial Layer Height**: 0.2mm
-- **Infill**: 15-20% (grid or gyroid pattern)
-- **Wall Loops**: 2-3
-- **Top/Bottom Layers**: 3
-- **Support**: None needed
-- **Bed Temperature**: 
-  - PLA: 60°C
-  - PETG: 80°C
-  - ABS: 100°C
-- **Nozzle Temperature**: As per filament specifications
-
-### Multi-Color Printing Options
-
-#### Option 1: Multi-Material (AMS)
-- Load black filament in slot 1
-- Load yellow filament in slot 2
-- The AMS will handle automatic switching
-
-#### Option 2: Manual Color Change
-- Print bottom layer first as separate job
-- Change filament
-- Print top layer aligned on the bottom
-
-#### Option 3: Single Print with Pause
-- Combine both STLs in slicer
-- Add filament change command at layer transition
-- Manually swap filament when prompted
-
-### Tips for Best Results
-
-1. **Bed Adhesion**: Ensure good first layer adhesion with proper bed leveling
-2. **Color Contrast**: Use high-contrast color combinations for best readability
-3. **Text Size**: Keep font size at least 10mm for clear text
-4. **Layer Thickness**: 1mm per layer provides good durability
-5. **Post-Processing**: Light sanding can improve text clarity if needed
-
-## Customization
-
-### Using as a Python Module
-
-```python
-from parametric_sign_generator import ParametricSignGenerator
-
-# Create generator instance
-generator = ParametricSignGenerator()
-
-# Generate custom sign
-meshes = generator.generate_sign(
-    text="CUSTOM TEXT",
-    sign_width=100,
-    sign_height=30,
-    font_size=18,
-    top_layer_thickness=1.0,
-    bottom_layer_thickness=1.0,
-    corner_radius=2.0,
-    font_name="Arial"
-)
-
-# Save STL files
-generator.save_stl(meshes, "custom_sign")
-```
-
-### Available Fonts
-
-The generator will attempt to use these fonts in order:
-1. Specified font (--font parameter)
-2. DejaVu Sans
-3. Liberation Sans
-4. Helvetica
-5. Arial
-6. System default sans-serif
-
-## Common Use Cases
-
-- **Equipment Labels**: Mark 3D printers, tools, and machinery
-- **Department Signs**: Office and workspace identification
-- **Warning Labels**: Safety and hazard warnings
-- **Component Marking**: Electronic enclosures and project boxes
-- **Cable Management**: Wire and cable identifiers
-- **Storage Labels**: Bins, drawers, and shelf marking
-- **Prototype Identification**: Version and serial numbers
+- ✅ **Live Preview Updates**: Text preview now updates in real-time as you type
+- ✅ **Font Size Control**: Spinbox changes trigger immediate preview updates
+- ✅ **Consistent Text Thickness**: Generated models now match preview appearance
+- ✅ **Stable GUI**: All startup errors and missing method references fixed
 
 ## Troubleshooting
 
-### Missing Dependencies
-If you get import errors, ensure all packages are installed:
-```bash
-pip install --upgrade -r requirements.txt
+### Top layer STL file not generated
+
+**Cause**: Text has cut completely through the layer
+
+**Solutions**:
+- Reduce font size
+- Reduce text heaviness
+- Increase top layer thickness
+- Use shorter text
+
+### Text appears too small
+
+**Solutions**:
+- Disable "Auto-size font" checkbox
+- Manually increase font size
+- Reduce sign dimensions
+
+### Generation fails with validation error
+
+**Solutions**:
+- Check all numeric inputs are valid
+- Ensure text is not empty
+- Verify dimensions are within limits (10-500mm width, 5-200mm height)
+
+### Preview not updating
+
+**Fixed in v1.0.1**: Preview now updates automatically when:
+- Typing in the text field
+- Changing font size with spinbox
+- Selecting different fonts
+- Adjusting text weight slider
+- Modifying dimensions
+
+## Development
+
+### Project Structure
+
+```
+signgen/
+├── src/
+│   ├── __init__.py
+│   ├── sign_generator.py    # Core generation engine
+│   ├── gui.py               # GUI application
+│   ├── cli.py               # CLI interface
+│   ├── validators.py        # Input validation
+│   ├── config_manager.py    # Settings management
+│   ├── exceptions.py        # Custom exceptions
+│   └── logger.py            # Logging configuration
+├── tests/
+│   ├── test_validators.py
+│   └── test_config.py
+├── output/                  # Generated STL files
+├── requirements.txt
+├── setup.py
+└── README.md
 ```
 
-### Font Issues
-If text doesn't render correctly, the system might be missing fonts:
-- **Linux**: `sudo apt-get install fonts-liberation fonts-dejavu`
-- **Windows**: Fonts should be available by default
-- **macOS**: Install additional fonts through Font Book if needed
+### Running Tests
 
-### STL File Issues
-If STL files won't import into your slicer:
-- Check that files are not empty (should be > 1KB)
-- Try opening in a 3D viewer first to verify geometry
-- Ensure your slicer supports ASCII STL format
+```bash
+# Install test dependencies
+pip install pytest pytest-cov
 
-### Text Not Centered
-Adjust the font_size parameter if text appears too large or small for the sign
+# Run tests
+pytest tests/
+
+# Run with coverage
+pytest --cov=src tests/
+```
+
+### Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## Requirements
+
+- Python 3.7+
+- CadQuery 2.0+
+- NumPy
+- Trimesh
+- Tkinter (usually included with Python)
 
 ## License
 
-MIT License - Feel free to modify and distribute
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contributing
+## Acknowledgments
 
-Contributions are welcome! Feel free to submit issues or pull requests for:
-- Additional font support
-- More geometric options (shapes, borders)
-- Multi-line text support
-- Icon/symbol integration
-- Alternative output formats
+- Built with [CadQuery](https://github.com/CadQuery/cadquery) for robust CAD operations
+- Optimized for [Bambu Lab](https://bambulab.com) printers
+- Inspired by the need for better workshop organization
 
-## Credits
+## Support
 
-Created for efficient label generation for 3D printing projects, optimized for the Bambu Lab P1S printer.
+For issues, questions, or suggestions, please [open an issue](https://github.com/maxwhitby/signgen/issues) on GitHub.
+
+---
+
+**Happy Printing! 🎯🖨️**
