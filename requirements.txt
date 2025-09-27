@@ -1,0 +1,14 @@
+# Core dependencies
+cadquery>=2.0
+trimesh>=3.9.0
+numpy>=1.19.0
+shapely>=1.7.0
+
+# Optional for enhanced features
+matplotlib>=3.3.0  # For 3D preview
+Pillow>=8.0.0  # For image handling
+
+# CadQuery dependencies (automatically installed)
+# scipy>=1.7.0
+# networkx>=2.6.0
+# rtree>=0.9.7

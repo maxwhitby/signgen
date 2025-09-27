@@ -1,0 +1,223 @@
+{
+  "project": {
+    "name": "Parametric Sign Generator GUI",
+    "version": "2.0.0",
+    "description": "GUI application for generating two-color 3D printable signs with text heaviness control",
+    "type": "Desktop GUI Application",
+    "author": "Generated via Claude Assistant",
+    "license": "MIT",
+    "repository": "local",
+    "created": "2024-09-26",
+    "last_modified": "2024-09-26",
+    "direction": "Transform CLI tool into user-friendly GUI application"
+  },
+  
+  "gui_requirements": {
+    "input_fields": {
+      "text_to_print": {
+        "type": "text_area",
+        "description": "Multi-line text for the sign"
+      },
+      "label_dimensions": {
+        "width_mm": "10-500mm range",
+        "height_mm": "5-200mm range"
+      },
+      "text_heaviness": {
+        "type": "slider_and_radio",
+        "range": "0-100",
+        "description": "Control amount of black inside characters (boldness)"
+      },
+      "bottom_layer_thickness": {
+        "type": "spinbox",
+        "range": "0.2-5.0mm",
+        "default": 1.0
+      },
+      "top_layer_thickness": {
+        "type": "spinbox",
+        "range": "0.2-5.0mm",
+        "default": 1.0
+      }
+    },
+    "buttons": ["Generate STL Files", "Preview", "Reset"],
+    "framework_options": ["tkinter (recommended)", "PyQt5", "PySide2"],
+    "key_feature": "Text heaviness control for font weight/boldness adjustment"
+  },
+  
+  "target_hardware": {
+    "printer": "Bambu Lab P1S",
+    "print_volume": [256, 256, 256],
+    "nozzle_diameter": 0.4,
+    "filament_diameter": 1.75,
+    "multi_material": true,
+    "ams_slots": 4
+  },
+  
+  "default_settings": {
+    "sign": {
+      "width": 100,
+      "height": 25,
+      "corner_radius": 2.0,
+      "top_thickness": 1.0,
+      "bottom_thickness": 1.0
+    },
+    "text": {
+      "font": "Arial",
+      "size": 12,
+      "auto_size": true,
+      "alignment": "center"
+    },
+    "materials": {
+      "bottom_layer": {
+        "color": "white",
+        "spool": 1,
+        "type": "PLA"
+      },
+      "top_layer": {
+        "color": "yellow",
+        "spool": 4,
+        "type": "PLA"
+      }
+    }
+  },
+  
+  "print_settings": {
+    "layer_height": 0.2,
+    "initial_layer_height": 0.2,
+    "wall_loops": 2,
+    "top_layers": 3,
+    "bottom_layers": 3,
+    "infill_density": 20,
+    "infill_pattern": "grid",
+    "print_speed": 60,
+    "travel_speed": 120,
+    "support_material": false,
+    "bed_temperature": 60,
+    "nozzle_temperature": 220
+  },
+  
+  "dependencies": {
+    "python": ">=3.8",
+    "packages": {
+      "cadquery": "latest",
+      "trimesh": ">=3.9.0",
+      "numpy": ">=1.21.0",
+      "shapely": ">=1.8.0",
+      "matplotlib": ">=3.4.0"
+    },
+    "optional": {
+      "flask": "for web interface",
+      "pillow": "for preview generation",
+      "qrcode": "for QR code support",
+      "pytest": "for testing"
+    }
+  },
+  
+  "file_structure": {
+    "main_scripts": [
+      "cadquery_sign_generator.py",
+      "generate_all_examples.py"
+    ],
+    "deprecated": [
+      "parametric_sign_generator.py",
+      "simple_sign_generator.py"
+    ],
+    "experimental": [
+      "create_3mf.py",
+      "create_bambu_3mf.py",
+      "working_sign_generator.py"
+    ],
+    "documentation": [
+      "claude.md",
+      "README.md",
+      "QUICK_START_GUIDE.md",
+      "PRINT_INSTRUCTIONS.md",
+      "TODO.md",
+      "BUGS.md",
+      "TESTING.md"
+    ],
+    "output_directory": "output/",
+    "test_directory": "tests/"
+  },
+  
+  "api_endpoints": {
+    "future_web_api": {
+      "generate": "/api/generate",
+      "preview": "/api/preview",
+      "download": "/api/download/{id}",
+      "templates": "/api/templates"
+    }
+  },
+  
+  "templates": {
+    "warning_sign": {
+      "font_size": 18,
+      "corner_radius": 3,
+      "colors": ["red", "white"]
+    },
+    "asset_label": {
+      "font_size": 10,
+      "corner_radius": 1,
+      "include_qr": true
+    },
+    "name_plate": {
+      "font_size": 14,
+      "corner_radius": 2.5,
+      "multi_line": true
+    }
+  },
+  
+  "known_working_examples": [
+    {
+      "text": "Threaded Inserts",
+      "width": 100,
+      "height": 25,
+      "font_size": 8.5,
+      "output": "ThreadedInserts_Final"
+    },
+    {
+      "text": "MOTOR-01",
+      "width": 80,
+      "height": 25,
+      "font_size": 14,
+      "output": "motor_label"
+    },
+    {
+      "text": "HIGH VOLTAGE",
+      "width": 120,
+      "height": 40,
+      "font_size": 18,
+      "output": "warning_sign"
+    }
+  ],
+  
+  "test_commands": [
+    "python cadquery_sign_generator.py \"TEST\" --width 60 --height 20",
+    "python generate_all_examples.py",
+    "python -m pytest tests/"
+  ],
+  
+  "deployment": {
+    "method": "standalone",
+    "platforms": ["windows", "linux", "macos"],
+    "docker_image": "not_yet_created",
+    "web_deployment": "planned"
+  },
+  
+  "metrics": {
+    "average_generation_time": "2-3 seconds",
+    "typical_file_sizes": {
+      "bottom_layer": "26KB",
+      "top_layer": "300KB-1.2MB",
+      "combined": "350KB-1.3MB"
+    },
+    "memory_usage": "~50MB",
+    "cpu_usage": "single-threaded"
+  },
+  
+  "roadmap": {
+    "v1.1": ["Multi-line text", "Font selection", "Input validation"],
+    "v1.2": ["QR codes", "Icon library", "Mounting holes"],
+    "v1.3": ["Web interface", "Batch processing", "Preview images"],
+    "v2.0": ["3D text effects", "Custom fonts", "Cloud service"]
+  }
+}
