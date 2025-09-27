@@ -1,9 +1,9 @@
 # SignGen - Parametric Sign Generator for 3D Printing
 
-## Project Status: v1.0.1 - COMPLETE & DEPLOYED ✅
+## Project Status: v1.0.2 - COMPLETE & DEPLOYED ✅
 
 **GitHub Repository**: https://github.com/maxwhitby/signgen
-**Current Version**: 1.0.1
+**Current Version**: 1.0.2
 **Last Updated**: September 27, 2024
 
 ## Project Overview
@@ -21,8 +21,8 @@ A fully-functional desktop application for creating customizable two-color signs
   - `src/gui.py` - Consolidated GUI with all features
   - `src/cli.py` - Full-featured command-line interface
 
-### GUI Application (v1.0.1)
-- **Real-time 2D Preview**: Updates as you type (fixed in v1.0.1)
+### GUI Application (v1.0.2)
+- **Real-time 2D Preview**: Updates instantly on ALL parameter changes (enhanced in v1.0.2)
 - **Text Controls**:
   - Multi-line text input with live preview
   - Font selection (16 platform-specific sans-serif fonts)
@@ -31,8 +31,8 @@ A fully-functional desktop application for creating customizable two-color signs
 - **Text Weight/Heaviness**:
   - 0-100 slider control
   - Preset buttons (Light/Regular/Bold/Extra Bold)
-  - Multi-cut patterns for bold effects
-  - Consistent thickness between preview and generation (fixed in v1.0.1)
+  - Simplified generation for reliability (improved in v1.0.2)
+  - Consistent thickness between preview and generation (fixed in v1.0.1, refined in v1.0.2)
 - **Dimension Controls**:
   - Width: 10-500mm
   - Height: 5-200mm
@@ -60,15 +60,26 @@ python -m src.cli "TEXT" [options]
   --debug                  Enable debug logging
 ```
 
-## Recent Fixes (v1.0.1)
+## Recent Fixes (v1.0.2)
+
+1. **Enhanced Real-Time Updates**: ALL controls now trigger instant preview updates
+   - Added variable tracing for width, height, font, thickness controls
+   - Improved text widget synchronization with StringVar
+2. **Text Generation Stability**:
+   - Switched to single-cut approach for all text weights
+   - Eliminated geometry errors from multi-cut patterns
+   - All weight levels generate successfully
+3. **Refined Text Weight System**:
+   - Light: 0.90x (thinner)
+   - Regular: 1.00x (baseline)
+   - Bold: 1.15x (noticeably bolder)
+   - Extra Bold: 1.30x (very bold)
+
+## Previous Fixes (v1.0.1)
 
 1. **Live Preview Updates**: Text preview now updates in real-time when typing
 2. **Font Size Control**: Spinbox changes trigger immediate preview updates
-3. **Text Thickness Consistency**:
-   - Regular weight now uses 1.05x size multiplier
-   - Better match between preview and generated models
-4. **GUI Stability**: Fixed all method reference errors that caused startup failures
-5. **Preset Management**: Added all missing preset management methods
+3. **GUI Stability**: Fixed all method reference errors that caused startup failures
 
 ## Project Structure
 ```

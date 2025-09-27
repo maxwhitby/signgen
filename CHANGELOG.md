@@ -2,6 +2,33 @@
 
 All notable changes to SignGen will be documented in this file.
 
+## [1.0.2] - 2024-09-27
+
+### Fixed
+- **Real-Time Preview Updates**: All parameter controls now trigger instant preview updates
+  - Added variable tracing for width, height, font, thickness controls
+  - Improved text widget handler with proper StringVar synchronization
+- **Text Generation Stability**: Simplified text cutting for improved reliability
+  - Removed problematic multi-cut patterns that caused geometry errors
+  - All weight levels (Light/Regular/Bold/Extra Bold) now generate successfully
+
+### Changed
+- **Text Weight System**: Refined size multipliers for better visual differentiation
+  - Light: 0.90x (thinner text)
+  - Regular: 1.00x (normal baseline)
+  - Bold: 1.15x (noticeably bolder)
+  - Extra Bold: 1.30x (very bold)
+- **Generation Method**: Switched to single-cut approach for all text weights
+  - More reliable geometry generation
+  - Eliminated "empty workpiece" errors
+  - Consistent results across all heaviness settings
+
+### Technical Improvements
+- Variable tracing implementation for responsive GUI
+- Simplified offset pattern system (removed complex 9-point grid)
+- Better text change event handling
+- Improved consistency between preview and generated models
+
 ## [1.0.1] - 2024-09-27
 
 ### Fixed

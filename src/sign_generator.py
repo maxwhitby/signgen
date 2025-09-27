@@ -197,26 +197,26 @@ class SignGenerator:
 
         if heaviness <= 25:
             params.update({
-                'size_multiplier': 0.95,
-                'stroke_offset': -0.05,
+                'size_multiplier': 0.90,  # Thin text
+                'stroke_offset': 0.0,
                 'style': 'Light'
             })
         elif heaviness <= 50:
             params.update({
-                'size_multiplier': 1.05,  # Slightly larger for regular
-                'stroke_offset': 0.0,  # No offset to avoid issues
+                'size_multiplier': 1.00,  # Normal size
+                'stroke_offset': 0.0,
                 'style': 'Regular'
             })
         elif heaviness <= 75:
             params.update({
-                'size_multiplier': 1.12,
-                'stroke_offset': 0.3,
+                'size_multiplier': 1.15,  # Noticeably bolder
+                'stroke_offset': 0.0,
                 'style': 'Bold'
             })
         else:
             params.update({
-                'size_multiplier': 1.25,
-                'stroke_offset': 0.5,
+                'size_multiplier': 1.30,  # Very bold
+                'stroke_offset': 0.0,
                 'style': 'ExtraBold'
             })
 
@@ -293,57 +293,32 @@ class SignGenerator:
         """Apply text cutout with heaviness effects"""
         cut_depth = thickness * font_params['cut_depth_multiplier'] * 1.1
 
-        # Multi-cut for bold effects
-        if font_params['style'] in ['Bold', 'ExtraBold']:
-            offset = font_params['stroke_offset']
-            offsets = self._get_offset_pattern(font_params['style'], offset)
-
-            for dx, dy in offsets:
-                try:
-                    workpiece = (
-                        workpiece
-                        .faces(">Z")
-                        .workplane()
-                        .center(dx, dy)
-                        .text(
-                            text,
-                            font_size,
-                            -cut_depth,
-                            font=font_family,
-                            halign="center",
-                            valign="center"
-                        )
-                        .center(-dx, -dy)
-                    )
-                except Exception as e:
-                    self.logger.warning(f"Offset cut failed at ({dx}, {dy}): {e}")
-        else:
-            # Single cut for regular/light text
-            workpiece = (
-                workpiece
-                .faces(">Z")
-                .workplane()
-                .text(
-                    text,
-                    font_size,
-                    -cut_depth,
-                    font=font_family,
-                    halign="center",
-                    valign="center"
-                )
+        # Use single cut for all styles - rely on size multiplier for thickness
+        # Multi-cut patterns were causing geometry issues
+        workpiece = (
+            workpiece
+            .faces(">Z")
+            .workplane()
+            .text(
+                text,
+                font_size,
+                -cut_depth,
+                font=font_family,
+                halign="center",
+                valign="center"
             )
+        )
 
         return workpiece
 
     def _get_offset_pattern(self, style: str, offset: float) -> List[Tuple[float, float]]:
         """Get offset pattern for text effects"""
-        if style == 'Regular':
-            # Small 3-point pattern for Regular to add slight thickness
-            return [
-                (0, 0),
-                (offset, 0),
-                (-offset, 0)
-            ]
+        if style == 'Light':
+            # No offset for Light text
+            return [(0, 0)]
+        elif style == 'Regular':
+            # No offset for Regular text to keep it clean
+            return [(0, 0)]
         elif style == 'Bold':
             # 5-point pattern for Bold
             return [
@@ -354,11 +329,15 @@ class SignGenerator:
                 (0, -offset)
             ]
         else:  # ExtraBold
-            # 9-point grid for ExtraBold
+            # 7-point pattern for ExtraBold (reduced from 9 to prevent over-cutting)
             return [
-                (dx * offset, dy * offset)
-                for dx in [-1, 0, 1]
-                for dy in [-1, 0, 1]
+                (0, 0),
+                (offset, 0),
+                (-offset, 0),
+                (0, offset),
+                (0, -offset),
+                (offset * 0.7, offset * 0.7),
+                (-offset * 0.7, -offset * 0.7)
             ]
 
     def _create_combined_preview(

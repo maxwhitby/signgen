@@ -1,12 +1,12 @@
 # SignGen - Parametric Sign Generator for 3D Printing
 
-![Version](https://img.shields.io/badge/version-1.0.1-green.svg)
+![Version](https://img.shields.io/badge/version-1.0.2-green.svg)
 ![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 A powerful tool for creating customizable two-color signs and labels for 3D printing, optimized for Bambu Lab P1S printers with bi-color printing capability.
 
-**Latest Updates (v1.0.1)**: Fixed live preview updates, improved text thickness consistency, see [CHANGELOG](CHANGELOG.md) for details.
+**Latest Updates (v1.0.2)**: Enhanced real-time preview updates for all controls, improved text generation stability, see [CHANGELOG](CHANGELOG.md) for details.
 
 ## Features
 

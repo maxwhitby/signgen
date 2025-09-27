@@ -106,6 +106,16 @@ class SignGeneratorGUI:
         # Generation in progress flag
         self.generating = False
 
+        # Add variable tracing for real-time preview updates
+        if self.config.get("advanced.auto_preview_update", True):
+            self.width_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            self.height_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            self.font_family_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            self.font_size_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            self.auto_size_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            self.bottom_thickness_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            self.top_thickness_var.trace_add("write", lambda *args: self.on_parameter_changed())
+
     def _get_available_fonts(self) -> List[str]:
         """Get list of available sans-serif fonts"""
         # Core fonts that should work on most systems
@@ -250,7 +260,7 @@ class SignGeneratorGUI:
 
         # Bind for live preview
         if self.config.get("advanced.auto_preview_update", True):
-            self.text_input.bind('<KeyRelease>', lambda e: self.update_preview())
+            self.text_input.bind('<KeyRelease>', lambda e: self.on_text_changed())
         row += 1
 
         # Font selection
@@ -607,6 +617,13 @@ class SignGeneratorGUI:
         self.config.set("defaults.top_thickness", self.top_thickness_var.get())
 
     # Event Handlers
+    def on_text_changed(self, *args):
+        """Handle text widget changes and sync with StringVar"""
+        if hasattr(self, 'text_input'):
+            current_text = self.text_input.get('1.0', 'end-1c').strip()
+            self.text_var.set(current_text)
+        self.on_parameter_changed()
+
     def on_parameter_changed(self, *args):
         """Handle parameter changes"""
         if self.config.get("advanced.auto_preview_update", True):
