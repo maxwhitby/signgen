@@ -65,8 +65,8 @@ class SignGeneratorGUI:
         """Configure main window"""
         self.root.title("🏷️ Parametric Sign Generator")
 
-        # Window dimensions from config
-        width = self.config.get("window.width", 1100)
+        # Window dimensions from config - significantly increased width to prevent cropping
+        width = self.config.get("window.width", 1400)
         height = self.config.get("window.height", 820)
         self.root.geometry(f"{width}x{height}")
 
@@ -75,7 +75,7 @@ class SignGeneratorGUI:
         self.root.resizable(resizable, resizable)
 
         if resizable:
-            min_width = self.config.get("window.min_width", 1000)
+            min_width = self.config.get("window.min_width", 1100)
             min_height = self.config.get("window.min_height", 750)
             self.root.minsize(min_width, min_height)
 
@@ -115,6 +115,7 @@ class SignGeneratorGUI:
             self.auto_size_var.trace_add("write", lambda *args: self.on_parameter_changed())
             self.bottom_thickness_var.trace_add("write", lambda *args: self.on_parameter_changed())
             self.top_thickness_var.trace_add("write", lambda *args: self.on_parameter_changed())
+            # Note: heaviness_var uses Scale widget's command callback, not trace
 
     def _get_available_fonts(self) -> List[str]:
         """Get list of available sans-serif fonts"""
@@ -156,11 +157,11 @@ class SignGeneratorGUI:
         container = ttk.Frame(self.root, padding="10")
         container.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
 
-        # Configure grid weights for resizing
+        # Configure grid weights for resizing - give more weight to controls panel
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        container.columnconfigure(0, weight=1)
-        container.columnconfigure(1, weight=1)
+        container.columnconfigure(0, weight=2)  # Controls panel gets more space
+        container.columnconfigure(1, weight=1)  # Preview panel gets less
 
         # Left panel - Controls
         self._create_controls_panel(container)
@@ -221,7 +222,7 @@ class SignGeneratorGUI:
     def _create_controls_panel(self, parent):
         """Create the controls panel"""
         left_frame = ttk.LabelFrame(parent, text="Sign Parameters", padding="10")
-        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(0, 5))
+        left_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(10, 5))
 
         # Create notebook for organized controls
         notebook = ttk.Notebook(left_frame)
@@ -279,6 +280,7 @@ class SignGeneratorGUI:
             state='readonly'
         )
         self.font_dropdown.pack(side=tk.LEFT, padx=5)
+        self.font_dropdown.bind('<<ComboboxSelected>>', lambda e: self.on_parameter_changed())
 
         # Font preset buttons
         for label, font in [("Classic", "Arial"), ("Modern", "Helvetica"), ("Bold", "Impact")]:
@@ -299,24 +301,30 @@ class SignGeneratorGUI:
         dims_frame.grid(row=row, column=0, columnspan=2, sticky=(tk.W, tk.E))
 
         ttk.Label(dims_frame, text="Width:").pack(side=tk.LEFT, padx=5)
-        ttk.Spinbox(
+        width_spinbox = ttk.Spinbox(
             dims_frame,
             from_=self.config.get("validation.width_min", 10),
             to=self.config.get("validation.width_max", 500),
             textvariable=self.width_var,
             width=10,
-            increment=5
-        ).pack(side=tk.LEFT, padx=5)
+            increment=5,
+            command=lambda: self.on_parameter_changed()
+        )
+        width_spinbox.pack(side=tk.LEFT, padx=5)
+        width_spinbox.bind('<KeyRelease>', lambda e: self.on_parameter_changed())
 
         ttk.Label(dims_frame, text="Height:").pack(side=tk.LEFT, padx=20)
-        ttk.Spinbox(
+        height_spinbox = ttk.Spinbox(
             dims_frame,
             from_=self.config.get("validation.height_min", 5),
             to=self.config.get("validation.height_max", 200),
             textvariable=self.height_var,
             width=10,
-            increment=5
-        ).pack(side=tk.LEFT, padx=5)
+            increment=5,
+            command=lambda: self.on_parameter_changed()
+        )
+        height_spinbox.pack(side=tk.LEFT, padx=5)
+        height_spinbox.bind('<KeyRelease>', lambda e: self.on_parameter_changed())
         row += 1
 
         # Font size
@@ -371,13 +379,13 @@ class SignGeneratorGUI:
         presets_frame = ttk.Frame(parent)
         presets_frame.grid(row=row, column=0, columnspan=2, pady=5)
 
-        for text, value in [("Light", 25), ("Regular", 50), ("Bold", 75), ("Extra Bold", 100)]:
+        for text, value in [("Light", 25), ("Regular", 50), ("Bold", 75), ("Extra Bold", 90)]:
             ttk.Radiobutton(
                 presets_frame,
                 text=text,
                 variable=self.heaviness_preset,
                 value=text,
-                command=lambda v=value: self.set_heaviness_preset(v)
+                command=lambda t=text: self.set_heaviness_preset(t)
             ).pack(side=tk.LEFT, padx=10)
         row += 1
 
@@ -410,26 +418,32 @@ class SignGeneratorGUI:
         thickness_frame.grid(row=row, column=0, columnspan=2)
 
         ttk.Label(thickness_frame, text="Bottom:").pack(side=tk.LEFT, padx=5)
-        ttk.Spinbox(
+        bottom_spinbox = ttk.Spinbox(
             thickness_frame,
             from_=self.config.get("validation.thickness_min", 0.2),
             to=self.config.get("validation.thickness_max", 5.0),
             textvariable=self.bottom_thickness_var,
             width=8,
             increment=0.1,
-            format="%.1f"
-        ).pack(side=tk.LEFT, padx=5)
+            format="%.1f",
+            command=lambda: self.on_parameter_changed()
+        )
+        bottom_spinbox.pack(side=tk.LEFT, padx=5)
+        bottom_spinbox.bind('<KeyRelease>', lambda e: self.on_parameter_changed())
 
         ttk.Label(thickness_frame, text="Top:").pack(side=tk.LEFT, padx=20)
-        ttk.Spinbox(
+        top_spinbox = ttk.Spinbox(
             thickness_frame,
             from_=self.config.get("validation.thickness_min", 0.2),
             to=self.config.get("validation.thickness_max", 5.0),
             textvariable=self.top_thickness_var,
             width=8,
             increment=0.1,
-            format="%.1f"
-        ).pack(side=tk.LEFT, padx=5)
+            format="%.1f",
+            command=lambda: self.on_parameter_changed()
+        )
+        top_spinbox.pack(side=tk.LEFT, padx=5)
+        top_spinbox.bind('<KeyRelease>', lambda e: self.on_parameter_changed())
         row += 1
 
         # Validation warning area
@@ -510,18 +524,21 @@ class SignGeneratorGUI:
     def _create_preview_panel(self, parent):
         """Create the preview panel"""
         right_frame = ttk.LabelFrame(parent, text="Preview", padding="10")
-        right_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(5, 0))
+        right_frame.grid(row=0, column=1, sticky=(tk.W, tk.E, tk.N, tk.S), padx=(5, 25))
 
-        # Preview canvas
+        # Store reference for potential resizing
+        self.preview_frame = right_frame
+
+        # Preview canvas - further reduced to ensure no cropping
         self.preview_canvas = Canvas(
             right_frame,
-            width=450,
+            width=400,
             height=400,
             bg='white',
             relief='sunken',
             borderwidth=2
         )
-        self.preview_canvas.pack(pady=10)
+        self.preview_canvas.pack(pady=5, padx=0)
 
         # Preview info
         self.preview_info = ttk.Label(right_frame, text="", font=('Arial', 9))
@@ -706,8 +723,8 @@ class SignGeneratorGUI:
             font_size = self.font_size_var.get() if not auto_size else None
             heaviness = self.heaviness_var.get()
 
-            # Canvas dimensions
-            canvas_w = 450
+            # Canvas dimensions - match the actual canvas size
+            canvas_w = 400
             canvas_h = 400
 
             # Calculate scale
@@ -734,32 +751,31 @@ class SignGeneratorGUI:
             else:
                 preview_font_size = font_size * scale
 
-            # Determine text appearance based on heaviness
-            if heaviness <= 15:
-                text_color = '#404040'  # Dark gray for very light
-                size_adjustment = 0.9
-            elif heaviness <= 25:
-                text_color = '#303030'  # Darker gray for light
-                size_adjustment = 0.95
+            # Determine text appearance based on heaviness - match generator values
+            if heaviness <= 25:
+                text_color = '#404040'  # Dark gray for light
+                size_adjustment = 0.90  # Match generator: Light = 0.90x
             elif heaviness <= 50:
                 text_color = '#000000'  # Black for regular
-                size_adjustment = 1.0
+                size_adjustment = 1.00  # Match generator: Regular = 1.00x
             elif heaviness <= 75:
                 text_color = '#000000'  # Black for bold
-                size_adjustment = 1.1
+                size_adjustment = 1.15  # Match generator: Bold = 1.15x
             else:
                 text_color = '#000000'  # Black for extra bold
-                size_adjustment = 1.2
+                size_adjustment = 1.30  # Match generator: Extra Bold = 1.30x
+
+            # Add fine-tuning within range (same as generator) - reduced for smoother transitions
+            range_position = (heaviness % 25) / 25.0
+            size_adjustment += range_position * 0.02
 
             preview_font_size *= size_adjustment
 
-            # Determine font weight
-            if heaviness <= 25:
+            # Determine font weight - use bold for heavier weights to simulate thickness
+            if heaviness <= 50:
                 weight = 'normal'
-            elif heaviness <= 75:
-                weight = 'bold'
             else:
-                weight = 'bold'  # Extra bold uses bold + offset
+                weight = 'bold'  # Use bold font for weights > 50
 
             # Create font
             try:
@@ -767,30 +783,23 @@ class SignGeneratorGUI:
             except:
                 font = ('Arial', int(preview_font_size), weight)
 
-            # Draw text with offset for bold effects
+            # Draw text - use subtle overlays only for extreme weights
             center_x = rect_x + rect_w / 2
             center_y = rect_y + rect_h / 2
 
-            if heaviness > 75:  # Extra bold - multiple overlays
-                offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0),
-                          (0, 1), (1, -1), (1, 0), (1, 1)]
-                for dx, dy in offsets:
+            if heaviness > 80:  # Only for very heavy text, add subtle overlay
+                # Small offset to simulate extra thickness without overdoing it
+                for dx, dy in [(0.5, 0), (-0.5, 0), (0, 0.5), (0, -0.5)]:
                     self.preview_canvas.create_text(
                         center_x + dx, center_y + dy,
                         text=text, font=font, fill=text_color
                     )
-            elif heaviness > 50:  # Bold - 5-way overlay
-                offsets = [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]
-                for dx, dy in offsets:
-                    self.preview_canvas.create_text(
-                        center_x + dx, center_y + dy,
-                        text=text, font=font, fill=text_color
-                    )
-            else:  # Regular or light - single text
-                self.preview_canvas.create_text(
-                    center_x, center_y,
-                    text=text, font=font, fill=text_color
-                )
+
+            # Main text draw
+            self.preview_canvas.create_text(
+                center_x, center_y,
+                text=text, font=font, fill=text_color
+            )
 
             # Add dimensions label
             dim_text = f"{width}mm × {height}mm"

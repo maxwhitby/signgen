@@ -1,9 +1,9 @@
 # SignGen - Parametric Sign Generator for 3D Printing
 
-## Project Status: v1.0.2 - COMPLETE & DEPLOYED ✅
+## Project Status: v1.0.3 - COMPLETE & DEPLOYED ✅
 
 **GitHub Repository**: https://github.com/maxwhitby/signgen
-**Current Version**: 1.0.2
+**Current Version**: 1.0.3
 **Last Updated**: September 27, 2024
 
 ## Project Overview
@@ -60,7 +60,29 @@ python -m src.cli "TEXT" [options]
   --debug                  Enable debug logging
 ```
 
-## Recent Fixes (v1.0.2)
+## Recent Fixes (v1.0.3)
+
+1. **Complete GUI Controls Responsiveness**:
+   - All spinboxes now have command callbacks and KeyRelease bindings
+   - Font dropdown properly bound with ComboboxSelected event
+   - Every control triggers immediate preview updates
+2. **Preview Panel Layout Fix**:
+   - Fixed cropping issue with 25px right padding
+   - Window width increased to 1400px
+   - Canvas reduced to 400x400px for better fit
+   - Symmetrical padding for professional appearance
+3. **Preview Text Rendering Improvements**:
+   - Better weight representation using bold font for heaviness > 50
+   - Subtle overlays only for extra heavy text (>80)
+   - Consistent with generator's size-based approach
+4. **Preset Buttons Fixed**:
+   - Radio buttons now properly control the slider
+   - Correct lambda passing for text names
+5. **Slider Sensitivity Refined**:
+   - Reduced fine-tuning from 0.05 to 0.02
+   - Smoother, more gradual transitions
+
+## Previous Fixes (v1.0.2)
 
 1. **Enhanced Real-Time Updates**: ALL controls now trigger instant preview updates
    - Added variable tracing for width, height, font, thickness controls

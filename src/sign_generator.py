@@ -220,9 +220,9 @@ class SignGenerator:
                 'style': 'ExtraBold'
             })
 
-        # Fine-tune within range
+        # Fine-tune within range - reduced from 0.05 to 0.02 for smoother transitions
         range_position = (heaviness % 25) / 25.0
-        params['size_multiplier'] += range_position * 0.05
+        params['size_multiplier'] += range_position * 0.02
 
         return params
 
