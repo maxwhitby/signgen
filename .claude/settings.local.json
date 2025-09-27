@@ -9,7 +9,14 @@
       "Bash(tree:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh auth:*)",
+      "Bash(git push:*)",
+      "Read(//Users/maxwhitby/.ssh/**)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh-add:*)",
+      "Bash(timeout 3 python -m src.gui)"
     ],
     "deny": [],
     "ask": []

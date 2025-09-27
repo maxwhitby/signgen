@@ -183,27 +183,27 @@ class SignGeneratorGUI:
         # Edit menu
         edit_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Edit", menu=edit_menu)
-        edit_menu.add_command(label="Reset to Defaults", command=self.reset_fields)
-        edit_menu.add_command(label="Clear Recent Files", command=self.clear_recent)
+        edit_menu.add_command(label="Reset to Defaults", command=self.reset_to_defaults)
+        edit_menu.add_command(label="Clear Recent Files", command=lambda: self.config.set("recent_files", []))
 
         # View menu
         view_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="View", menu=view_menu)
         view_menu.add_checkbutton(
             label="Debug Mode",
-            variable=self.debug_mode_var,
-            command=self.toggle_debug_mode
+            variable=self.debug_var,
+            command=self.on_debug_changed
         )
         view_menu.add_checkbutton(
             label="Auto Preview",
             variable=tk.BooleanVar(value=self.config.get("advanced.auto_preview_update", True)),
-            command=self.toggle_auto_preview
+            command=lambda: self.config.set("advanced.auto_preview_update", not self.config.get("advanced.auto_preview_update", True))
         )
 
         # Help menu
         help_menu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Help", menu=help_menu)
-        help_menu.add_command(label="User Guide", command=self.show_help)
+        help_menu.add_command(label="User Guide", command=self.show_user_guide)
         help_menu.add_command(label="Troubleshooting", command=self.show_troubleshooting)
         help_menu.add_separator()
         help_menu.add_command(label="About", command=self.show_about)
@@ -333,7 +333,7 @@ class SignGeneratorGUI:
             size_frame,
             text="Auto-size to fit",
             variable=self.auto_size_var,
-            command=self.toggle_auto_size
+            command=self.on_auto_size_changed
         )
         self.auto_size_check.pack(side=tk.LEFT, padx=20)
 
@@ -380,7 +380,7 @@ class SignGeneratorGUI:
             variable=self.heaviness_var,
             orient=tk.HORIZONTAL,
             length=250,
-            command=self.update_heaviness_display
+            command=lambda v: self.on_heaviness_changed()
         )
         self.heaviness_slider.pack(side=tk.LEFT, padx=5, fill=tk.X, expand=True)
 
@@ -444,7 +444,7 @@ class SignGeneratorGUI:
         scrollbar.config(command=self.presets_listbox.yview)
 
         # Load presets
-        self._refresh_presets_list()
+        self._update_preset_list()
         row += 1
 
         # Preset buttons
@@ -474,7 +474,7 @@ class SignGeneratorGUI:
         ttk.Button(
             button_frame,
             text="Validate",
-            command=self.validate_parameters
+            command=self.validate_inputs
         ).pack(side=tk.LEFT, padx=5)
 
         # Preview button
@@ -488,7 +488,7 @@ class SignGeneratorGUI:
         ttk.Button(
             button_frame,
             text="Reset",
-            command=self.reset_fields
+            command=self.reset_to_defaults
         ).pack(side=tk.LEFT, padx=5)
 
         # Progress bar
@@ -987,6 +987,28 @@ class SignGeneratorGUI:
             self.update_preview()
             self.status_var.set("Reset to defaults")
 
+    def suggest_optimal_parameters(self):
+        """Suggest optimal parameters based on text and dimensions"""
+        text = self.text_var.get()
+        width = self.width_var.get()
+        height = self.height_var.get()
+
+        suggestions = self.validator.suggest_parameters(text, width, height)
+
+        # Apply suggestions
+        if messagebox.askyesno("Apply Suggestions",
+                               f"Suggested settings:\n"
+                               f"Font size: {suggestions['font_size']}mm\n"
+                               f"Heaviness: {suggestions['heaviness']}\n"
+                               f"Auto-size: {'Yes' if suggestions['auto_size'] else 'No'}\n\n"
+                               f"Apply these settings?"):
+            self.font_size_var.set(suggestions['font_size'])
+            self.heaviness_var.set(suggestions['heaviness'])
+            self.auto_size_var.set(suggestions['auto_size'])
+            self.bottom_thickness_var.set(suggestions['bottom_thickness'])
+            self.top_thickness_var.set(suggestions['top_thickness'])
+            self.update_preview()
+
     def open_output_folder(self):
         """Open the output folder in file explorer"""
         output_dir = self.generator.output_dir
@@ -1098,10 +1120,60 @@ class SignGeneratorGUI:
         self.update_preview()
         self.status_var.set("Preset loaded")
 
+    def save_current_as_preset(self):
+        """Save current settings as a new preset"""
+        self.save_preset()
+
+    def delete_selected_preset(self):
+        """Delete the selected preset"""
+        if not hasattr(self, 'presets_listbox'):
+            return
+
+        selection = self.presets_listbox.curselection()
+        if selection:
+            preset_name = self.presets_listbox.get(selection[0])
+            if messagebox.askyesno("Delete Preset", f"Delete preset '{preset_name}'?"):
+                presets = self.config.get_presets()
+                if preset_name in presets:
+                    del presets[preset_name]
+                    self.config.set("presets", presets)
+                    self._update_preset_list()
+
+    def rename_selected_preset(self):
+        """Rename the selected preset"""
+        if not hasattr(self, 'presets_listbox'):
+            return
+
+        selection = self.presets_listbox.curselection()
+        if selection:
+            old_name = self.presets_listbox.get(selection[0])
+            new_name = simpledialog.askstring("Rename Preset", f"New name for '{old_name}':")
+            if new_name:
+                presets = self.config.get_presets()
+                if old_name in presets:
+                    presets[new_name] = presets.pop(old_name)
+                    self.config.set("presets", presets)
+                    self._update_preset_list()
+
+    def load_selected_preset(self):
+        """Load the selected preset from listbox"""
+        if not hasattr(self, 'presets_listbox'):
+            return
+
+        selection = self.presets_listbox.curselection()
+        if selection:
+            preset_name = self.presets_listbox.get(selection[0])
+            preset = self.config.load_preset(preset_name)
+            if preset:
+                self._apply_preset(preset)
+
     def _update_preset_list(self):
         """Update preset list in UI if visible"""
-        # This would update a preset tab if implemented
-        pass
+        if hasattr(self, 'presets_listbox'):
+            self.presets_listbox.delete(0, tk.END)
+            presets = self.config.get_presets()
+            for name in presets.keys():
+                self.presets_listbox.insert(tk.END, name)
 
     def export_settings(self):
         """Export current settings to file"""
