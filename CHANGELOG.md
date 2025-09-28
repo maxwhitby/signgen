@@ -2,6 +2,31 @@
 
 All notable changes to SignGen will be documented in this file.
 
+## [1.0.4] - 2024-09-28
+
+### Fixed
+- **Preview vs. Generation Text Thickness Discrepancy**: Text now renders with consistent thickness between preview and generated STL files
+  - Generator now utilizes CadQuery's `kind` parameter to use bold fonts for heaviness > 50
+  - Preview rendering updated to match generator's exact font weights
+  - Eliminated unnecessary overlay effects in preview
+
+### Changed
+- **Text Weight System Overhaul**: Refined size multipliers to account for bold font thickness
+  - Light (0-25): 0.95x with regular font (increased from 0.90x)
+  - Regular (26-50): 1.05x with regular font (increased from 1.00x)
+  - Bold (51-75): 1.00x with bold font (reduced from 1.15x)
+  - Extra Bold (76-100): 1.10x with bold font (reduced from 1.30x)
+- **CadQuery Text Generation**: Added font `kind` parameter support
+  - Regular font kind for weights ≤ 50
+  - Bold font kind for weights > 50
+  - Provides native font weight rendering
+
+### Technical Improvements
+- Added `font_kind` parameter to font params dictionary
+- Generator's `_apply_text_cutout` method now passes `kind` parameter to CadQuery
+- Preview font rendering simplified to rely on actual font weights
+- Better consistency between preview and 3D generation through native font support
+
 ## [1.0.3] - 2024-09-27
 
 ### Fixed

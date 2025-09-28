@@ -754,16 +754,16 @@ class SignGeneratorGUI:
             # Determine text appearance based on heaviness - match generator values
             if heaviness <= 25:
                 text_color = '#404040'  # Dark gray for light
-                size_adjustment = 0.90  # Match generator: Light = 0.90x
+                size_adjustment = 0.95  # Match generator: Light = 0.95x
             elif heaviness <= 50:
                 text_color = '#000000'  # Black for regular
-                size_adjustment = 1.00  # Match generator: Regular = 1.00x
+                size_adjustment = 1.05  # Match generator: Regular = 1.05x
             elif heaviness <= 75:
                 text_color = '#000000'  # Black for bold
-                size_adjustment = 1.15  # Match generator: Bold = 1.15x
+                size_adjustment = 1.00  # Match generator: Bold = 1.00x (bold font adds thickness)
             else:
                 text_color = '#000000'  # Black for extra bold
-                size_adjustment = 1.30  # Match generator: Extra Bold = 1.30x
+                size_adjustment = 1.10  # Match generator: Extra Bold = 1.10x (bold font adds thickness)
 
             # Add fine-tuning within range (same as generator) - reduced for smoother transitions
             range_position = (heaviness % 25) / 25.0
@@ -771,11 +771,11 @@ class SignGeneratorGUI:
 
             preview_font_size *= size_adjustment
 
-            # Determine font weight - use bold for heavier weights to simulate thickness
+            # Determine font weight - use bold for heavier weights to match CadQuery's kind parameter
             if heaviness <= 50:
                 weight = 'normal'
             else:
-                weight = 'bold'  # Use bold font for weights > 50
+                weight = 'bold'  # Use bold font for weights > 50 (matches generator's font_kind='bold')
 
             # Create font
             try:
@@ -783,19 +783,11 @@ class SignGeneratorGUI:
             except:
                 font = ('Arial', int(preview_font_size), weight)
 
-            # Draw text - use subtle overlays only for extreme weights
+            # Draw text - bold font should be sufficient for heavy weights
             center_x = rect_x + rect_w / 2
             center_y = rect_y + rect_h / 2
 
-            if heaviness > 80:  # Only for very heavy text, add subtle overlay
-                # Small offset to simulate extra thickness without overdoing it
-                for dx, dy in [(0.5, 0), (-0.5, 0), (0, 0.5), (0, -0.5)]:
-                    self.preview_canvas.create_text(
-                        center_x + dx, center_y + dy,
-                        text=text, font=font, fill=text_color
-                    )
-
-            # Main text draw
+            # Main text draw - no overlays needed since we're using bold fonts
             self.preview_canvas.create_text(
                 center_x, center_y,
                 text=text, font=font, fill=text_color

@@ -1,10 +1,10 @@
 # SignGen - Parametric Sign Generator for 3D Printing
 
-## Project Status: v1.0.3 - COMPLETE & DEPLOYED ✅
+## Project Status: v1.0.4 - COMPLETE & DEPLOYED ✅
 
 **GitHub Repository**: https://github.com/maxwhitby/signgen
-**Current Version**: 1.0.3
-**Last Updated**: September 27, 2024
+**Current Version**: 1.0.4
+**Last Updated**: September 28, 2024
 
 ## Project Overview
 A fully-functional desktop application for creating customizable two-color signs/labels for 3D printing, optimized for Bambu Lab P1S printers. The signs use a stencil-cut technique where text is cut out from the top layer, revealing the contrasting bottom layer color.
@@ -60,7 +60,20 @@ python -m src.cli "TEXT" [options]
   --debug                  Enable debug logging
 ```
 
-## Recent Fixes (v1.0.3)
+## Recent Fixes (v1.0.4)
+
+1. **Fixed Preview vs. Generation Text Thickness Discrepancy**:
+   - Root Cause: CadQuery's `text()` method supports font `kind` parameter ('regular', 'bold') that wasn't being utilized
+   - Solution: Generator now uses `kind='bold'` for heaviness > 50 to match preview's bold font rendering
+   - Adjusted size multipliers to account for bold font's natural thickness increase:
+     - Light (0-25): 0.95x with regular font
+     - Regular (26-50): 1.05x with regular font
+     - Bold (51-75): 1.00x with bold font (reduced from 1.15x)
+     - Extra Bold (76-100): 1.10x with bold font (reduced from 1.30x)
+   - Preview updated to match generator's exact parameters
+   - Result: Consistent text thickness between preview and generated STL files
+
+## Previous Fixes (v1.0.3)
 
 1. **Complete GUI Controls Responsiveness**:
    - All spinboxes now have command callbacks and KeyRelease bindings
@@ -91,11 +104,11 @@ python -m src.cli "TEXT" [options]
    - Switched to single-cut approach for all text weights
    - Eliminated geometry errors from multi-cut patterns
    - All weight levels generate successfully
-3. **Refined Text Weight System**:
-   - Light: 0.90x (thinner)
-   - Regular: 1.00x (baseline)
-   - Bold: 1.15x (noticeably bolder)
-   - Extra Bold: 1.30x (very bold)
+3. **Refined Text Weight System** (Updated in v1.0.4):
+   - Light: 0.95x with regular font
+   - Regular: 1.05x with regular font
+   - Bold: 1.00x with bold font
+   - Extra Bold: 1.10x with bold font
 
 ## Previous Fixes (v1.0.1)
 

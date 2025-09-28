@@ -192,32 +192,37 @@ class SignGenerator:
             'size_multiplier': 1.0,
             'stroke_offset': 0.0,
             'cut_depth_multiplier': 1.0,
-            'style': 'Regular'
+            'style': 'Regular',
+            'font_kind': 'regular'  # CadQuery font kind parameter
         }
 
         if heaviness <= 25:
             params.update({
-                'size_multiplier': 0.90,  # Thin text
+                'size_multiplier': 0.95,  # Slightly increased for regular font
                 'stroke_offset': 0.0,
-                'style': 'Light'
+                'style': 'Light',
+                'font_kind': 'regular'
             })
         elif heaviness <= 50:
             params.update({
-                'size_multiplier': 1.00,  # Normal size
+                'size_multiplier': 1.05,  # Slightly increased for regular font
                 'stroke_offset': 0.0,
-                'style': 'Regular'
+                'style': 'Regular',
+                'font_kind': 'regular'
             })
         elif heaviness <= 75:
             params.update({
-                'size_multiplier': 1.15,  # Noticeably bolder
+                'size_multiplier': 1.00,  # Reduced since bold adds thickness
                 'stroke_offset': 0.0,
-                'style': 'Bold'
+                'style': 'Bold',
+                'font_kind': 'bold'
             })
         else:
             params.update({
-                'size_multiplier': 1.30,  # Very bold
+                'size_multiplier': 1.10,  # Reduced since bold adds thickness
                 'stroke_offset': 0.0,
-                'style': 'ExtraBold'
+                'style': 'ExtraBold',
+                'font_kind': 'bold'
             })
 
         # Fine-tune within range - reduced from 0.05 to 0.02 for smoother transitions
@@ -293,7 +298,7 @@ class SignGenerator:
         """Apply text cutout with heaviness effects"""
         cut_depth = thickness * font_params['cut_depth_multiplier'] * 1.1
 
-        # Use single cut for all styles - rely on size multiplier for thickness
+        # Use single cut for all styles - rely on size multiplier and font kind for thickness
         # Multi-cut patterns were causing geometry issues
         workpiece = (
             workpiece
@@ -304,6 +309,7 @@ class SignGenerator:
                 font_size,
                 -cut_depth,
                 font=font_family,
+                kind=font_params['font_kind'],  # Use bold font for heavier weights
                 halign="center",
                 valign="center"
             )
